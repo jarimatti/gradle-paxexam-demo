@@ -1,0 +1,81 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.0.0'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    group 'fi.jarimatti.demo.paxexam'
+    version '0.0.1-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'biz.aQute.bnd.builder'
+
+    sourceCompatibility = 1.8
+
+    dependencies {
+        compile 'biz.aQute.bnd:biz.aQute.bndlib:3.0.0'
+
+        testCompile 'junit:junit:4.12'
+    }
+}
+
+// A project for integration tests.
+// This is a separate project, because the idea is to test multiple subprojects together.
+project(':service-itest') {
+
+    // Separate task for integration tests.
+    task itest(type: Test) {
+        group 'Verification'
+        description 'Run the integration tests.'
+
+        testClassesDir = sourceSets.itest.output.classesDir
+        classpath = sourceSets.itest.runtimeClasspath
+
+        testLogging.showStandardStreams = true
+    }
+
+    check.dependsOn itest
+
+    sourceSets {
+        itest {
+            java.srcDir file('src/itest/java')
+            resources.srcDir file('src/itest/resources')
+        }
+    }
+
+    dependencies {
+        // The project(s) we're going to test.
+        itestCompile project(':service')
+
+        // OSGi
+        itestCompile 'org.osgi:org.osgi.core:5.0.0'
+
+        // Pax-Exam using Karaf container.
+        itestCompile 'org.ops4j.pax.exam:pax-exam-container-karaf:4.6.0'
+        itestCompile 'org.ops4j.pax.exam:pax-exam-junit4:4.6.0'
+        itestCompile 'org.ops4j.pax.exam:pax-exam:4.6.0'
+        itestCompile 'org.ops4j.pax.url:pax-url-aether:2.4.3'
+        itestCompile 'javax.inject:javax.inject:1'
+        itestCompile 'org.slf4j:slf4j-simple:1.7.12'
+    }
+
+    // This makes the itest dependencies visible in IDEA editors.
+    // See: http://stackoverflow.com/questions/28314470
+    apply plugin: 'idea'
+    idea {
+        module {
+            scopes.TEST.plus += [ configurations.itestCompile ]
+        }
+    }
+}

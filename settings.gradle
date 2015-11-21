@@ -1,0 +1,3 @@
+rootProject.name = 'paxexam'
+include 'service'
+include 'service-itest'

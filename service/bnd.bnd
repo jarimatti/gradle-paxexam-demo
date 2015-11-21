@@ -1,0 +1,3 @@
+Export-Package: fi.jarimatti.demo.paxexam.service.api
+Private-Package: fi.jarimatti.demo.paxexam.service.impl
+Service-Component: *
